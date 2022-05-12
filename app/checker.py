@@ -1,4 +1,4 @@
-from core import emailutils, credentials
+from core import emailutils, credentials, notification
 
 def main():
     cred = credentials.Credentials()
@@ -13,6 +13,7 @@ def main():
         limit
     )
     checker.read_email()
+    notification.Notification.send_notification(checker.new_emails)
 
 if __name__ == "__main__":
     main()

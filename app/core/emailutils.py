@@ -14,7 +14,12 @@ class MissionControl:
         self.email.login(username, password)
         self.limit = limit
         self.config = cred
+        self._new_emails = []
 
+    @property
+    def new_emails(self):
+        return self._new_emails
+    
     def to_timestamp(self, date_message):
         msg_datetime = email.utils.parsedate_to_datetime(date_message)
         return msg_datetime.timestamp()
@@ -32,6 +37,8 @@ class MissionControl:
         for i in range(int(msgs[0]), int(msgs[0]) - self.limit, -1):
             _, message = self.email.fetch(str(i), '(RFC822)')
             for r in message:
+                email_subject = ''
+                email_from = ''
                 if isinstance(r, tuple):
                     message = email.message_from_bytes(r[1])
                     if latest_message is None:
@@ -43,14 +50,14 @@ class MissionControl:
                     e_from = email.header.decode_header(message["from"])
                     codification = subject[0][1]
                     if isinstance(subject[0][0], str):
-                        print(subject[0][0])
+                        email_subject = subject[0][0]
                     else: 
-                        print(subject[0][0].decode('utf-8' if codification is None else codification))
+                        email_subject = subject[0][0].decode('utf-8' if codification is None else codification)
                     
                     codification = e_from[0][1]
                     if isinstance(e_from[0][0], str):
-                        print (e_from[0][0])
+                        email_from = e_from[0][0]
                     else:
-                        print(e_from[0][0].decode('utf-8' if codification is None else codification))
-                    print('===================================')
+                        email_from = e_from[0][0].decode('utf-8' if codification is None else codification)
+                    self._new_emails.append(Message(email_from, email_subject))
         self.save_timestamp(latest_message)
