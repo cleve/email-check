@@ -31,6 +31,7 @@ class MissionControl:
         self.config.create_timestamp_check_point(t_stamp)
     
     def read_email(self):
+        self._new_emails = []
         latest_timestamp = float(self.config.read_file('APP', 'timestamp'))
         _, msgs = self.email.select('INBOX')
         latest_message = None
