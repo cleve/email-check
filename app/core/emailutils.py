@@ -9,11 +9,12 @@ Message = namedtuple("Message", "title body")
 class MissionControl:
     """Read email and notify if is the case
     """
-    def __init__(self, username: str, password: str, config, limit: int=10) -> None:
+    def __init__(self, username: str, password: str, config, mark_as_read: bool, limit: int=10) -> None:
         self.email = imaplib.IMAP4_SSL('imap.gmail.com')
         self.email.login(username, password)
         self.limit = limit
         self.config = config
+        self.mark_as_read = mark_as_read
         self._new_emails = []
 
     @property
@@ -30,14 +31,14 @@ class MissionControl:
         t_stamp = self._to_timestamp(message['date'])
         self.config.create_timestamp_check_point(t_stamp)
 
-    def _mark_as_unseen(self, message_id: int) -> None:
+    def _mark_as_unseen(self, message_uid: str) -> None:
         """After notify, mark as unseen to not modify the
         usual bahaviour
 
         Args:
-            message_id (int): message id
+            message_id (str): message uid
         """
-        self.email.store(message_id, '+FLAG', '\\Seen')
+        self.email.uid('STORE', message_uid, '-FLAGS', '(\Seen)')
     
     def read_email(self):
         self._new_emails = []
@@ -72,6 +73,7 @@ class MissionControl:
                     self._new_emails.append(Message(email_from, email_subject))
             
             # Nothing happen!
-            # self._mark_as_unseen(str(i))
+            if not self.mark_as_read:
+                self._mark_as_unseen(str(i))
     
         self._save_timestamp(latest_message)
