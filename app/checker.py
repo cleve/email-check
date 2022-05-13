@@ -16,6 +16,7 @@ def main():
             config.read_file('CRED', 'user'),
             config.read_file('CRED', 'pass'),
             config,
+            mark_as_read,
             limit
         )
     # UI start
