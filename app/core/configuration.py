@@ -2,7 +2,7 @@ import configparser
 import os
 
 
-class Credentials:
+class Configuration:
     """Handle credentials to provide to the core process
     Read and write access to config file.
     """

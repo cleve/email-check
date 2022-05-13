@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 from time import sleep
-from core import emailutils, credentials, notification
+from core import configuration, emailutils, notification
+
 
 DEBUG = True
 
 def main():
-    cred = credentials.Credentials()
-    limit = int(cred.read_file('DEFAULT', 'limit'))
-    interval = int(cred.read_file('DEFAULT', 'interval'))
-    if cred.read_file('CRED', 'user') == 'no':
-        cred.create_credentials()
+    config = configuration.Configuration()
+    limit = int(config.read_file('DEFAULT', 'limit'))
+    interval = int(config.read_file('DEFAULT', 'interval'))
+    mark_as_read = config.read_file('DEFAULT', 'markasread')
+    if config.read_file('CRED', 'user') == 'no':
+        config.create_credentials()
     checker = emailutils.MissionControl(
-            cred.read_file('CRED', 'user'),
-            cred.read_file('CRED', 'pass'),
-            cred,
+            config.read_file('CRED', 'user'),
+            config.read_file('CRED', 'pass'),
+            config,
             limit
         )
     # UI start
