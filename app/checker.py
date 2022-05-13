@@ -2,6 +2,8 @@
 from time import sleep
 from core import emailutils, credentials, notification
 
+DEBUG = True
+
 def main():
     cred = credentials.Credentials()
     limit = int(cred.read_file('DEFAULT', 'limit'))
@@ -14,10 +16,14 @@ def main():
             cred,
             limit
         )
+    # UI start
+    sleep(30)
     while 1:
-        sleep(interval)
         checker.read_email()
         notification.Notification.send_notification(checker.new_emails)
+        if DEBUG:
+            break
+        sleep(interval)
 
 if __name__ == "__main__":
     main()
