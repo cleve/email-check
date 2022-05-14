@@ -9,10 +9,9 @@ Message = namedtuple("Message", "title body")
 class MissionControl:
     """Read email and notify if is the case
     """
-    def __init__(self, username: str, password: str, config, mark_as_read: bool, limit: int=10) -> None:
+    def __init__(self, username: str, password: str, config, mark_as_read: bool) -> None:
         self.email = imaplib.IMAP4_SSL('imap.gmail.com')
         self.email.login(username, password)
-        self.limit = limit
         self.config = config
         self.mark_as_read = mark_as_read
         self._new_emails = []
@@ -31,22 +30,31 @@ class MissionControl:
         t_stamp = self._to_timestamp(message['date'])
         self.config.create_timestamp_check_point(t_stamp)
 
-    def _mark_as_unseen(self, message_uid: str) -> None:
+    def _mark_as_unseen(self, message_id) -> None:
         """After notify, mark as unseen to not modify the
         usual bahaviour
 
         Args:
             message_id (str): message uid
         """
-        self.email.uid('STORE', message_uid, '-FLAGS', '(\Seen)')
+        self.email.store(message_id, '-FLAGS', '\\Seen')
+        self.email.store(message_id.decode(), '-FLAGS', '\\Seen')
     
     def read_email(self):
         self._new_emails = []
-        latest_timestamp = float(self.config.read_file('APP', 'timestamp'))
-        _, msgs = self.email.select('INBOX', readonly=False)
         latest_message = None
-        for i in range(int(msgs[0]), int(msgs[0]) - self.limit, -1):
-            _, message = self.email.fetch(str(i), '(RFC822)')
+        latest_timestamp = float(self.config.read_file('APP', 'timestamp'))
+
+        # Selecting folder
+        self.email.select('INBOX', readonly=False)
+        
+        # Filtering
+        retcode, messages = self.email.search(None, '(UNSEEN)')
+        if retcode != 'OK':
+            return
+
+        for i in messages[0].split():
+            _, message = self.email.fetch(i, '(RFC822)')
             for r in message:
                 email_subject = ''
                 email_from = ''
@@ -74,6 +82,6 @@ class MissionControl:
             
             # Nothing happen!
             if not self.mark_as_read:
-                self._mark_as_unseen(str(i))
+                self._mark_as_unseen(i)
     
         self._save_timestamp(latest_message)

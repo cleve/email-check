@@ -7,7 +7,6 @@ DEBUG = True
 
 def main():
     config = configuration.Configuration()
-    limit = int(config.read_file('DEFAULT', 'limit'))
     interval = int(config.read_file('DEFAULT', 'interval'))
     mark_as_read = config.read_file('DEFAULT', 'markasread')
     if config.read_file('CRED', 'user') == 'no':
@@ -16,8 +15,7 @@ def main():
             config.read_file('CRED', 'user'),
             config.read_file('CRED', 'pass'),
             config,
-            mark_as_read,
-            limit
+            mark_as_read
         )
     # UI start
     sleep(30)
