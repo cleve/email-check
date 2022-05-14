@@ -3,7 +3,7 @@ from time import sleep
 from core import configuration, emailutils, notification
 
 
-DEBUG = True
+DEBUG = False
 
 def main():
     config = configuration.Configuration()
