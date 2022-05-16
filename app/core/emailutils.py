@@ -53,7 +53,14 @@ class MissionControl:
         if retcode != 'OK':
             return
 
-        for i in messages[0].split():
+        email_ids = messages[0].split()
+
+        # More than one, send generic notification
+        if len(email_ids) > 1:
+            self._new_emails = [1, 2]
+            return
+
+        for i in email_ids:
             _, message = self.email.fetch(i, '(RFC822)')
             for r in message:
                 email_subject = ''
